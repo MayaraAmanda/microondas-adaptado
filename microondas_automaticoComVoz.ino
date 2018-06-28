@@ -9,7 +9,7 @@
 VR myVR(2,3);  
 TMRpcm tmrpcm;
 Servo motor, motor1, motor2;
-int valorLasanha = 8, valorArroz = 2, valorFeijao = 5;
+int valorLasanha = 3, valorArroz = 2, valorFeijao = 5, valorCondicaoM, valorCondicaoS;
 int segundos=0, minutos=0, i;
 uint8_t records[7]; // save record
 uint8_t buf[64];
@@ -73,7 +73,7 @@ void printVR(uint8_t *buf)
 
 void setup()
 {
-  /** initialize */
+
   myVR.begin(9600);
 
   tmrpcm.speakerPin = 9;
@@ -89,19 +89,12 @@ void setup()
   motor.write(0);
   motor1.write(0);
   motor2.write(0);
-  //Serial.println("Elechouse Voice Recognition V3 Module\r\nControl LED sample");
   
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);
      //pinMode(led3, OUTPUT);
     
-  //if(myVR.clear() == 0){
-    //Serial.println("Recognizer cleared.");
-  //}else{
-    //Serial.println("Not find VoiceRecognitionModule.");
-    //Serial.println("Please check connection and restart Arduino.");
-    //while(1);
-  //}
+
   
   if(myVR.load((uint8_t)ESQUENTAR_ARROZ) >= 0){ // carrega o comando treinado no módulo.
   }
@@ -131,14 +124,12 @@ void loop()
         //descongelarFeijao();
         break;
       case FAZER_LASANHA:
-        /** turn off LED*/
         digitalWrite(led1, HIGH);
         tmrpcm.setVolume(5);
         tmrpcm.play("lasanha.wav");
-        //fazerLasanha();
+        fazerLasanha();
         break;
       case CANCELAR:
-        /** turn off LED*/
         digitalWrite(led1, LOW);
         digitalWrite(led2, LOW);
         //digitalWrite(led3, LOW);
@@ -188,12 +179,16 @@ void fazerLasanha(){
      motor1.write(120);
      delay(1000);
 
-     contador();
+     contador(30, 2);
 
   }
 
-void contador(){
-    for(i=0; i<=60; i++){
+void contador(int valorCondicaoS, int valorCondicaoM){
+
+  int seg = valorCondicaoS;
+  int minu = valorCondicaoM;
+  
+      for(i=0; i<=60; i++){
       if(segundos==60){
         segundos=0;
         minutos++;
@@ -204,8 +199,14 @@ void contador(){
       Serial.print("\tSegundos: ");
       Serial.println(segundos);
       delay(1000);
-      }
-    
+
+      
+  if(minutos==minu and segundos==seg){
+    Serial.println("Tempo dado");
+    minutos=0, segundos=0;
+  }
+    }
+      
 }
 void cancelar(){
      motor2.write(180);
