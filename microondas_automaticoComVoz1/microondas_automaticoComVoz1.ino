@@ -76,13 +76,11 @@ void setup()
   motor.write(0);
   motor1.write(0);
   motor2.write(0);
-    
-  if(myVR.load((uint8_t)DESCONGELAR_FEIJAO) >= 0){
-  }
-  if(myVR.load((uint8_t)FAZER_LASANHA) >= 0){
-  }
-  if(myVR.load((uint8_t)CANCELAR) >= 0){
-  }
+
+  if(myVR.load((uint8_t)ESQUENTAR_ARROZ) >= 0){}
+  if(myVR.load((uint8_t)DESCONGELAR_FEIJAO) >= 0){}
+  if(myVR.load((uint8_t)FAZER_LASANHA) >= 0){}
+  if(myVR.load((uint8_t)CANCELAR) >= 0){}
 }
 
 void loop()
