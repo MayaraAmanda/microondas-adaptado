@@ -1,25 +1,19 @@
 #include <SoftwareSerial.h>
-#include "VoiceRecognitionV3.h"
+#include <VoiceRecognitionV3.h>
 #include <Servo.h>
 #include "SD.h"
-#define SD_ChipSelectPin 4
+#define SD_ChipSelectPin 10 
 #include "TMRpcm.h"
 #include "SPI.h"
 
 VR myVR(2,3);  
 TMRpcm tmrpcm;
 Servo motor, motor1, motor2;
-int valorLasanha = 3, valorArroz = 2, valorFeijao = 5, valorCondicaoM, valorCondicaoS;
+int valorLasanha = 8, valorFeijao = 5, valorArroz = 1;
 int segundos=0, minutos=0, i;
-uint8_t records[7]; // save record
+uint8_t records[7]; 
 uint8_t buf[64];
 
-int led1 = 6;
-int led2 = 5;
-//int led3 = 7;
-
-
-#define ESQUENTAR_ARROZ    (0)
 #define DESCONGELAR_FEIJAO   (1) 
 #define FAZER_LASANHA   (2) 
 #define CANCELAR   (3) 
@@ -73,38 +67,20 @@ void printVR(uint8_t *buf)
 
 void setup()
 {
-
   myVR.begin(9600);
-
-  tmrpcm.speakerPin = 9;
-  //Serial.begin(9600);
-  if (!SD.begin(SD_ChipSelectPin)) {
-  Serial.println("SD fail");
-  return;
-  }
+  tmrpcm.speakerPin = 9; 
   Serial.begin(115200);
-  motor.attach(7); //+1
-  //motor1.attach(8); // ligar
-  motor2.attach(10); // cancelar
+  motor.attach(5); //+1
+  motor1.attach(6); // ligar
+  motor2.attach(7); // cancelar
   motor.write(0);
   motor1.write(0);
   motor2.write(0);
-  
-  pinMode(led1, OUTPUT);
-  pinMode(led2, OUTPUT);
-     //pinMode(led3, OUTPUT);
-    
 
-  
-  if(myVR.load((uint8_t)ESQUENTAR_ARROZ) >= 0){ // carrega o comando treinado no módulo.
-  }
-  
-  if(myVR.load((uint8_t)DESCONGELAR_FEIJAO) >= 0){
-  }
-  if(myVR.load((uint8_t)FAZER_LASANHA) >= 0){
-  }
-  if(myVR.load((uint8_t)CANCELAR) >= 0){
-  }
+  if(myVR.load((uint8_t)ESQUENTAR_ARROZ) >= 0){}
+  if(myVR.load((uint8_t)DESCONGELAR_FEIJAO) >= 0){}
+  if(myVR.load((uint8_t)FAZER_LASANHA) >= 0){}
+  if(myVR.load((uint8_t)CANCELAR) >= 0){}
 }
 
 void loop()
@@ -114,14 +90,14 @@ void loop()
   if(valorModulo>0){
     switch(buf[1]){
       case ESQUENTAR_ARROZ:
-        digitalWrite(led1, HIGH);
+        tmrpcm.setVolume(5);
+        tmrpcm.play("feijao.wav");
         esquentarArroz();
         break;
       case DESCONGELAR_FEIJAO:
-      digitalWrite(led2, HIGH);
         tmrpcm.setVolume(5);
         tmrpcm.play("feijao.wav");
-        //descongelarFeijao();
+        descongelarFeijao();
         break;
       case FAZER_LASANHA:
         digitalWrite(led1, HIGH);
@@ -130,57 +106,56 @@ void loop()
         fazerLasanha();
         break;
       case CANCELAR:
-        digitalWrite(led1, LOW);
-        digitalWrite(led2, LOW);
-        //digitalWrite(led3, LOW);
         cancelar();
+         tmrpcm.setVolume(5);
+        tmrpcm.play("cancelar.wav");
         break;
       default:
         break;
     }
-    /** voice recognized */
     printVR(buf);
   }
 }
 void esquentarArroz(){
       for(int i=0; i<valorArroz; i++){
+        motor.write(12);
+        delay(400);
         motor.write(0);
-        delay(1000);
-        motor.write(20);
-        delay(1000);      
+        delay(400); 
         }
-         motor1.write(0);
+         motor1.write(14);
          delay(1000);      
-         motor1.write(20);
+         motor1.write(0);
          delay(1000);     
+
+        contador(30, 0);
   }
 void descongelarFeijao(){
       for(int i=0; i<valorFeijao; i++){
-        motor.write(180);
+        motor.write(40);
         delay(1000);
-        motor.write(120);
+        motor.write(0);
         delay(1000);      
       }
-       motor1.write(180);
+       motor1.write(40);
        delay(1000);      
-       motor1.write(120);
+       motor1.write(0);
        delay(1000);    
+
+       contador(30, 4);
     }
 void fazerLasanha(){
-     //int valorSegundos=30, valorMinutos=1;
-     for(int i=0; i<valorLasanha; i++){
-      motor.write(180);
+    for(int i=0; i<valorLasanha; i++){
+      motor.write(40);
       delay(1000);
-      motor.write(120);
+      motor.write(0);
       delay(1000);      
     }
-     motor1.write(180);
+     motor1.write(40);
      delay(1000);      
-     motor1.write(120);
+     motor1.write(0);
      delay(1000);
-
-     contador(30, 2);
-
+     contador(30, 7);
   }
 
 void contador(int valorCondicaoS, int valorCondicaoM){
@@ -194,23 +169,16 @@ void contador(int valorCondicaoS, int valorCondicaoM){
         minutos++;
       }
       segundos++;
-      Serial.print("Minutos: ");
-      Serial.print(minutos);
-      Serial.print("\tSegundos: ");
-      Serial.println(segundos);
-      delay(1000);
-
       
   if(minutos==minu and segundos==seg){
-    Serial.println("Tempo dado");
-    minutos=0, segundos=0;
+      cancelar();
+      minutos=0, segundos=0;
   }
-    }
-      
+ }     
 }
 void cancelar(){
-     motor2.write(180);
-     delay(1000);      
-     motor2.write(120);
-     delay(1000);
+     motor2.write(10);
+     delay(400);      
+     motor2.write(0);
+     delay(400);
   }
