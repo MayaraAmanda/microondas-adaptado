@@ -14,6 +14,7 @@ int segundos=0, minutos=0, i;
 uint8_t records[7]; 
 uint8_t buf[64];
 
+#define ESQUENTAR_ARROZ   (0) 
 #define DESCONGELAR_FEIJAO   (1) 
 #define FAZER_LASANHA   (2) 
 #define CANCELAR   (3) 
